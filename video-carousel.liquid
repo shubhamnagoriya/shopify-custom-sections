@@ -1,6 +1,6 @@
 {% schema %}
 {
-  "name": "Shoppable Video Multi",
+  "name": "Shoppable Video Carousel",
   "settings": [
     {
       "type": "text",
@@ -110,58 +110,24 @@
           "info": "Optional: Image shown before video loads"
         },
         {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product",
+          "info": "Choose a product to feature in this video"
+        },
+        {
           "type": "checkbox",
           "id": "show_product_card",
-          "label": "Show Product Cards",
+          "label": "Show Product Card",
           "default": true,
           "info": "Display product overlay on this video"
-        },
-        {
-          "type": "product",
-          "id": "product_1",
-          "label": "Product 1"
-        },
-        {
-          "type": "product",
-          "id": "product_2",
-          "label": "Product 2"
-        },
-        {
-          "type": "product",
-          "id": "product_3",
-          "label": "Product 3"
-        },
-        {
-          "type": "product",
-          "id": "product_4",
-          "label": "Product 4"
-        },
-        {
-          "type": "product",
-          "id": "product_5",
-          "label": "Product 5"
-        },
-        {
-          "type": "product",
-          "id": "product_6",
-          "label": "Product 6"
-        },
-        {
-          "type": "product",
-          "id": "product_7",
-          "label": "Product 7"
-        },
-        {
-          "type": "product",
-          "id": "product_8",
-          "label": "Product 8"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Shoppable Video Multi",
+      "name": "Shoppable Video Carousel",
       "blocks": [
         {
           "type": "video"
@@ -271,24 +237,6 @@
     padding: 10px;
     z-index: 2;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
-
-  .product-mini-carousel {
-    position: relative;
-  }
-
-  .product-cards-wrapper {
-    overflow: hidden;
-    position: relative;
-  }
-
-  .product-cards-track {
-    display: flex;
-    transition: transform 0.3s ease;
-  }
-
-  .product-card-item {
-    flex: 0 0 100%;
     text-decoration: none;
     color: inherit;
   }
@@ -330,7 +278,7 @@
     transition: background 0.3s, transform 0.2s;
     text-decoration: none;
     display: inline-block;
-    line-height: 1.2em;
+    line-height: 1.2EM;
   }
 
   .product-card-button:hover {
@@ -374,70 +322,6 @@
     overflow: hidden;
   }
 
-  /* Mini Carousel Navigation */
-  .product-nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 16px;
-    z-index: 3;
-    transition: background 0.3s;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .product-nav-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
-  }
-
-  .product-nav-btn.prev {
-    left: -5px;
-  }
-
-  .product-nav-btn.next {
-    right: -5px;
-  }
-
-  .product-nav-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  /* Product Dots */
-  .product-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .product-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #ddd;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-    padding: 0;
-  }
-
-  .product-dot.active {
-    background: #333;
-    transform: scale(1.2);
-  }
-
-  /* Main Carousel Navigation */
   .carousel-nav-btn {
     position: absolute;
     top: 50%;
@@ -591,7 +475,7 @@
     }
 
     .product-card-right {
-      gap: 6px;
+      gap: 60pxpx;
     }
 
     .product-card-compare-price {
@@ -612,20 +496,6 @@
       width: 35px;
       height: 35px;
       font-size: 16px;
-    }
-
-    .product-nav-btn {
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
-    }
-
-    .product-nav-btn.prev {
-      left: -8px;
-    }
-
-    .product-nav-btn.next {
-      right: -8px;
     }
   }
 </style>
@@ -661,213 +531,25 @@
                 <span class="mute-icon">🔇</span>
               </button>
 
-              {% if block.settings.show_product_card %}
-                {% assign has_products = false %}
-                {% if block.settings.product_1 != blank or block.settings.product_2 != blank or block.settings.product_3 != blank or block.settings.product_4 != blank or block.settings.product_5 != blank or block.settings.product_6 != blank or block.settings.product_7 != blank or block.settings.product_8 != blank %}
-                  {% assign has_products = true %}
-                {% endif %}
-
-                {% if has_products %}
+              {% if block.settings.show_product_card and block.settings.product != blank %}
+                {% assign product = block.settings.product %}
                 <div class="product-card-overlay">
-                  <div class="product-mini-carousel" data-product-carousel>
-                    {% assign product_count = 0 %}
-                    {% if block.settings.product_1 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_2 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_3 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_4 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_5 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_6 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_7 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_8 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-
-                    {% if product_count > 1 %}
-                      <button class="product-nav-btn prev" aria-label="Previous product">‹</button>
+                  <div class="product-card-top">
+                    {% if product.featured_image %}
+                      <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
                     {% endif %}
-
-                    <div class="product-cards-wrapper">
-                      <div class="product-cards-track">
-                        {% if block.settings.product_1 != blank %}
-                          {% assign product = block.settings.product_1 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
+                    <div class="product-card-right">
+                      <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                      <div class="product-card-prices">
+                        {% if product.compare_at_price > product.price %}
+                          <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
                         {% endif %}
-
-                        {% if block.settings.product_2 != blank %}
-                          {% assign product = block.settings.product_2 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_3 != blank %}
-                          {% assign product = block.settings.product_3 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_4 != blank %}
-                          {% assign product = block.settings.product_4 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_5 != blank %}
-                          {% assign product = block.settings.product_5 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_6 != blank %}
-                          {% assign product = block.settings.product_6 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_7 != blank %}
-                          {% assign product = block.settings.product_7 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_8 != blank %}
-                          {% assign product = block.settings.product_8 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
+                        <p class="product-card-price">{{ product.price | money }}</p>
                       </div>
                     </div>
-
-                    {% if product_count > 1 %}
-                      <button class="product-nav-btn next" aria-label="Next product">›</button>
-                      
-                      <div class="product-dots">
-                        {% for i in (1..product_count) %}
-                          <button class="product-dot {% if forloop.first %}active{% endif %}" aria-label="Product {{ forloop.index }}"></button>
-                        {% endfor %}
-                      </div>
-                    {% endif %}
                   </div>
+                  <h3 class="product-card-title">{{ product.title }}</h3>
                 </div>
-                {% endif %}
               {% endif %}
             {% else %}
               <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;">
@@ -899,213 +581,25 @@
                 <span class="mute-icon">🔇</span>
               </button>
 
-              {% if block.settings.show_product_card %}
-                {% assign has_products = false %}
-                {% if block.settings.product_1 != blank or block.settings.product_2 != blank or block.settings.product_3 != blank or block.settings.product_4 != blank or block.settings.product_5 != blank or block.settings.product_6 != blank or block.settings.product_7 != blank or block.settings.product_8 != blank %}
-                  {% assign has_products = true %}
-                {% endif %}
-
-                {% if has_products %}
+              {% if block.settings.show_product_card and block.settings.product != blank %}
+                {% assign product = block.settings.product %}
                 <div class="product-card-overlay">
-                  <div class="product-mini-carousel" data-product-carousel>
-                    {% assign product_count = 0 %}
-                    {% if block.settings.product_1 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_2 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_3 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_4 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_5 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_6 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_7 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-                    {% if block.settings.product_8 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
-
-                    {% if product_count > 1 %}
-                      <button class="product-nav-btn prev" aria-label="Previous product">‹</button>
+                  <div class="product-card-top">
+                    {% if product.featured_image %}
+                      <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
                     {% endif %}
-
-                    <div class="product-cards-wrapper">
-                      <div class="product-cards-track">
-                        {% if block.settings.product_1 != blank %}
-                          {% assign product = block.settings.product_1 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
+                    <div class="product-card-right">
+                      <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                      <div class="product-card-prices">
+                        {% if product.compare_at_price > product.price %}
+                          <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
                         {% endif %}
-
-                        {% if block.settings.product_2 != blank %}
-                          {% assign product = block.settings.product_2 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_3 != blank %}
-                          {% assign product = block.settings.product_3 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_4 != blank %}
-                          {% assign product = block.settings.product_4 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_5 != blank %}
-                          {% assign product = block.settings.product_5 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_6 != blank %}
-                          {% assign product = block.settings.product_6 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_7 != blank %}
-                          {% assign product = block.settings.product_7 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
-
-                        {% if block.settings.product_8 != blank %}
-                          {% assign product = block.settings.product_8 %}
-                          <div class="product-card-item">
-                            <div class="product-card-top">
-                              {% if product.featured_image %}
-                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
-                              {% endif %}
-                              <div class="product-card-right">
-                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
-                                <div class="product-card-prices">
-                                  {% if product.compare_at_price > product.price %}
-                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
-                                  {% endif %}
-                                  <p class="product-card-price">{{ product.price | money }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <h3 class="product-card-title">{{ product.title }}</h3>
-                          </div>
-                        {% endif %}
+                        <p class="product-card-price">{{ product.price | money }}</p>
                       </div>
                     </div>
-
-                    {% if product_count > 1 %}
-                      <button class="product-nav-btn next" aria-label="Next product">›</button>
-                      
-                      <div class="product-dots">
-                        {% for i in (1..product_count) %}
-                          <button class="product-dot {% if forloop.first %}active{% endif %}" aria-label="Product {{ forloop.index }}"></button>
-                        {% endfor %}
-                      </div>
-                    {% endif %}
                   </div>
+                  <h3 class="product-card-title">{{ product.title }}</h3>
                 </div>
-                {% endif %}
               {% endif %}
             {% else %}
               <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;">
@@ -1144,94 +638,6 @@
     let touchEndX = 0;
     let isTransitioning = false;
     let isMobile = window.innerWidth <= 768;
-
-    // Initialize product mini-carousels
-    function initProductCarousels() {
-      const productCarousels = section.querySelectorAll('[data-product-carousel]');
-      
-      productCarousels.forEach(carousel => {
-        const track = carousel.querySelector('.product-cards-track');
-        const items = carousel.querySelectorAll('.product-card-item');
-        const prevBtn = carousel.querySelector('.product-nav-btn.prev');
-        const nextBtn = carousel.querySelector('.product-nav-btn.next');
-        const dots = carousel.querySelectorAll('.product-dot');
-        
-        if (items.length <= 1) return; // Skip if only one product
-        
-        let currentProductIndex = 0;
-        
-        function updateProductCarousel() {
-          track.style.transform = `translateX(-${currentProductIndex * 100}%)`;
-          
-          // Update dots
-          dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentProductIndex);
-          });
-          
-          // Update button states
-          if (prevBtn) {
-            prevBtn.disabled = currentProductIndex === 0;
-          }
-          if (nextBtn) {
-            nextBtn.disabled = currentProductIndex === items.length - 1;
-          }
-        }
-        
-        if (prevBtn) {
-          prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (currentProductIndex > 0) {
-              currentProductIndex--;
-              updateProductCarousel();
-            }
-          });
-        }
-        
-        if (nextBtn) {
-          nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (currentProductIndex < items.length - 1) {
-              currentProductIndex++;
-              updateProductCarousel();
-            }
-          });
-        }
-        
-        dots.forEach((dot, index) => {
-          dot.addEventListener('click', (e) => {
-            e.stopPropagation();
-            currentProductIndex = index;
-            updateProductCarousel();
-          });
-        });
-        
-        // Touch support for product carousel
-        let productTouchStartX = 0;
-        let productTouchEndX = 0;
-        
-        carousel.addEventListener('touchstart', (e) => {
-          productTouchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-        
-        carousel.addEventListener('touchend', (e) => {
-          productTouchEndX = e.changedTouches[0].screenX;
-          const diff = productTouchStartX - productTouchEndX;
-          const swipeThreshold = 30;
-          
-          if (Math.abs(diff) > swipeThreshold) {
-            if (diff > 0 && currentProductIndex < items.length - 1) {
-              currentProductIndex++;
-              updateProductCarousel();
-            } else if (diff < 0 && currentProductIndex > 0) {
-              currentProductIndex--;
-              updateProductCarousel();
-            }
-          }
-        }, { passive: true });
-        
-        updateProductCarousel();
-      });
-    }
 
     // Update slides per view based on screen size
     function updateSlidesPerView() {
@@ -1498,7 +904,6 @@
     updateSlidesPerView();
     setupMuteToggles();
     setupTouchEvents();
-    initProductCarousels();
     
     if (autoplay) {
       handleVideoPlayback();

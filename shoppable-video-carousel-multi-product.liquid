@@ -1,0 +1,1528 @@
+{% schema %}
+{
+  "name": "Shoppable Video Multi",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "WHAT OUR FELLOWS THINK"
+    },
+    {
+      "type": "range",
+      "id": "desktop_columns",
+      "min": 4,
+      "max": 7,
+      "step": 1,
+      "label": "Videos per row (Desktop)",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "tablet_columns",
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "label": "Videos per row (Tablet)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "mobile_columns",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Videos per row (Mobile)",
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable video autoplay on view",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_advance",
+      "label": "Auto-advance carousel",
+      "default": false,
+      "info": "Automatically move to next slide"
+    },
+    {
+      "type": "range",
+      "id": "auto_advance_speed",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "sec",
+      "label": "Auto-advance speed",
+      "default": 5,
+      "info": "Only applies if auto-advance is enabled"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video_file",
+          "label": "Video File",
+          "info": "Upload video file"
+        },
+        {
+          "type": "image_picker",
+          "id": "video_poster",
+          "label": "Video Poster (Thumbnail)",
+          "info": "Optional: Image shown before video loads"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_product_card",
+          "label": "Show Product Cards",
+          "default": true,
+          "info": "Display product overlay on this video"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "Product 4"
+        },
+        {
+          "type": "product",
+          "id": "product_5",
+          "label": "Product 5"
+        },
+        {
+          "type": "product",
+          "id": "product_6",
+          "label": "Product 6"
+        },
+        {
+          "type": "product",
+          "id": "product_7",
+          "label": "Product 7"
+        },
+        {
+          "type": "product",
+          "id": "product_8",
+          "label": "Product 8"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shoppable Video Multi",
+      "blocks": [
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .video-carousel-section {
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .video-carousel-heading {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 3rem;
+    color: {{ section.settings.heading_color }};
+  }
+
+  .video-carousel-container {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 70px;
+  }
+
+  .video-carousel-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .video-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 20px;
+  }
+
+  .video-carousel-slide {
+    flex: 0 0 calc((100% - ({{ section.settings.desktop_columns | minus: 1 }} * 20px)) / {{ section.settings.desktop_columns }});
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 9 / 16;
+  }
+
+  .video-carousel-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .video-mute-toggle {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    z-index: 3;
+    transition: background 0.3s;
+  }
+
+  .video-mute-toggle:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* Product Card Overlay Styles */
+  .product-card-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 10px;
+    z-index: 2;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .product-mini-carousel {
+    position: relative;
+  }
+
+  .product-cards-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .product-cards-track {
+    display: flex;
+    transition: transform 0.3s ease;
+  }
+
+  .product-card-item {
+    flex: 0 0 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .product-card-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .product-card-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #f5f5f5;
+    flex-shrink: 0;
+  }
+
+  .product-card-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .product-card-button {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 7px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.2em;
+  }
+
+  .product-card-button:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .product-card-prices {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .product-card-compare-price {
+    font-size: 12px;
+    font-weight: 500;
+    color: #aaa;
+    text-decoration: line-through;
+    margin: 0;
+    line-height: 8px;
+  }
+
+  .product-card-price {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+    line-height: 10px;
+  }
+
+  .product-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Mini Carousel Navigation */
+  .product-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    z-index: 3;
+    transition: background 0.3s;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .product-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .product-nav-btn.prev {
+    left: -5px;
+  }
+
+  .product-nav-btn.next {
+    right: -5px;
+  }
+
+  .product-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Product Dots */
+  .product-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .product-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    padding: 0;
+  }
+
+  .product-dot.active {
+    background: #333;
+    transform: scale(1.2);
+  }
+
+  /* Main Carousel Navigation */
+  .carousel-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    z-index: 1;
+    transition: background 0.3s;
+  }
+
+  .carousel-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .carousel-nav-btn.prev {
+    left: 10px;
+  }
+
+  .carousel-nav-btn.next {
+    right: 10px;
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+  }
+
+  .carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .carousel-dot.active {
+    background: #333;
+  }
+
+  @media (max-width: 1024px) {
+    .video-carousel-slide {
+      flex: 0 0 calc((100% - ({{ section.settings.tablet_columns | minus: 1 }} * 20px)) / {{ section.settings.tablet_columns }});
+    }
+
+    .video-carousel-heading {
+      font-size: 2rem;
+    }
+
+    .video-carousel-container {
+      padding: 0 60px;
+    }
+
+    .product-card-overlay {
+      padding: 10px;
+    }
+
+    .product-card-top {
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .product-card-image {
+      width: 55px;
+      height: 55px;
+    }
+
+    .product-card-button {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .product-card-compare-price {
+      font-size: 11px;
+    }
+
+    .product-card-price {
+      font-size: 18px;
+    }
+
+    .product-card-title {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .video-carousel-slide {
+      flex: 0 0 calc((100% - ({{ section.settings.mobile_columns | minus: 1 }} * 15px)) / {{ section.settings.mobile_columns }});
+    }
+
+    .video-carousel-track {
+      gap: 15px;
+    }
+
+    .video-carousel-heading {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .video-carousel-container {
+      padding: 0 20px 0 30px;
+    }
+
+    .carousel-nav-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .carousel-nav-btn.prev {
+      left: -10px;
+    }
+
+    .carousel-nav-btn.next {
+      right: -10px;
+    }
+
+    .product-card-overlay {
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      padding: 12px;
+    }
+
+    .product-card-top {
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .product-card-image {
+      width: 90px;
+      height: 90px;
+    }
+
+    .product-card-button {
+      padding: 8px 16px;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .product-card-right {
+      gap: 6px;
+    }
+
+    .product-card-compare-price {
+      font-size: 16px;
+    }
+
+    .product-card-price {
+      font-size: 24px;
+    }
+
+    .product-card-title {
+      font-size: 20px;
+    }
+
+    .video-mute-toggle {
+      top: 10px;
+      right: 10px;
+      width: 35px;
+      height: 35px;
+      font-size: 16px;
+    }
+
+    .product-nav-btn {
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+
+    .product-nav-btn.prev {
+      left: -8px;
+    }
+
+    .product-nav-btn.next {
+      right: -8px;
+    }
+  }
+</style>
+
+<div class="video-carousel-section" id="video-carousel-{{ section.id }}">
+  <div class="video-carousel-container">
+    {% if section.settings.heading != blank %}
+      <h2 class="video-carousel-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="video-carousel-wrapper">
+      <button class="carousel-nav-btn prev" aria-label="Previous">‹</button>
+      
+      <div class="video-carousel-track">
+        {% for block in section.blocks %}
+          <div class="video-carousel-slide" data-block-id="{{ block.id }}" data-slide-index="{{ forloop.index0 }}">
+            {% if block.settings.video_file %}
+              <video 
+                loop 
+                muted 
+                playsinline
+                {% if block.settings.video_poster %}
+                  poster="{{ block.settings.video_poster | image_url: width: 800 }}"
+                {% endif %}
+                data-video-element
+              >
+                {% for source in block.settings.video_file.sources %}
+                  <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                {% endfor %}
+              </video>
+              
+              <button class="video-mute-toggle" aria-label="Toggle mute">
+                <span class="mute-icon">🔇</span>
+              </button>
+
+              {% if block.settings.show_product_card %}
+                {% assign has_products = false %}
+                {% if block.settings.product_1 != blank or block.settings.product_2 != blank or block.settings.product_3 != blank or block.settings.product_4 != blank or block.settings.product_5 != blank or block.settings.product_6 != blank or block.settings.product_7 != blank or block.settings.product_8 != blank %}
+                  {% assign has_products = true %}
+                {% endif %}
+
+                {% if has_products %}
+                <div class="product-card-overlay">
+                  <div class="product-mini-carousel" data-product-carousel>
+                    {% assign product_count = 0 %}
+                    {% if block.settings.product_1 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_2 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_3 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_4 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_5 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_6 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_7 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_8 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+
+                    {% if product_count > 1 %}
+                      <button class="product-nav-btn prev" aria-label="Previous product">‹</button>
+                    {% endif %}
+
+                    <div class="product-cards-wrapper">
+                      <div class="product-cards-track">
+                        {% if block.settings.product_1 != blank %}
+                          {% assign product = block.settings.product_1 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_2 != blank %}
+                          {% assign product = block.settings.product_2 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_3 != blank %}
+                          {% assign product = block.settings.product_3 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_4 != blank %}
+                          {% assign product = block.settings.product_4 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_5 != blank %}
+                          {% assign product = block.settings.product_5 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_6 != blank %}
+                          {% assign product = block.settings.product_6 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_7 != blank %}
+                          {% assign product = block.settings.product_7 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_8 != blank %}
+                          {% assign product = block.settings.product_8 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    {% if product_count > 1 %}
+                      <button class="product-nav-btn next" aria-label="Next product">›</button>
+                      
+                      <div class="product-dots">
+                        {% for i in (1..product_count) %}
+                          <button class="product-dot {% if forloop.first %}active{% endif %}" aria-label="Product {{ forloop.index }}"></button>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;">
+                Add Video
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        
+        <!-- Clone slides for seamless infinite loop -->
+        {% for block in section.blocks %}
+          <div class="video-carousel-slide video-carousel-slide-clone" data-block-id="{{ block.id }}-clone" data-slide-index="{{ forloop.index0 }}">
+            {% if block.settings.video_file %}
+              <video 
+                loop 
+                muted 
+                playsinline
+                {% if block.settings.video_poster %}
+                  poster="{{ block.settings.video_poster | image_url: width: 800 }}"
+                {% endif %}
+                data-video-element
+              >
+                {% for source in block.settings.video_file.sources %}
+                  <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                {% endfor %}
+              </video>
+              
+              <button class="video-mute-toggle" aria-label="Toggle mute">
+                <span class="mute-icon">🔇</span>
+              </button>
+
+              {% if block.settings.show_product_card %}
+                {% assign has_products = false %}
+                {% if block.settings.product_1 != blank or block.settings.product_2 != blank or block.settings.product_3 != blank or block.settings.product_4 != blank or block.settings.product_5 != blank or block.settings.product_6 != blank or block.settings.product_7 != blank or block.settings.product_8 != blank %}
+                  {% assign has_products = true %}
+                {% endif %}
+
+                {% if has_products %}
+                <div class="product-card-overlay">
+                  <div class="product-mini-carousel" data-product-carousel>
+                    {% assign product_count = 0 %}
+                    {% if block.settings.product_1 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_2 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_3 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_4 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_5 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_6 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_7 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+                    {% if block.settings.product_8 != blank %}{% assign product_count = product_count | plus: 1 %}{% endif %}
+
+                    {% if product_count > 1 %}
+                      <button class="product-nav-btn prev" aria-label="Previous product">‹</button>
+                    {% endif %}
+
+                    <div class="product-cards-wrapper">
+                      <div class="product-cards-track">
+                        {% if block.settings.product_1 != blank %}
+                          {% assign product = block.settings.product_1 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_2 != blank %}
+                          {% assign product = block.settings.product_2 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_3 != blank %}
+                          {% assign product = block.settings.product_3 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_4 != blank %}
+                          {% assign product = block.settings.product_4 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_5 != blank %}
+                          {% assign product = block.settings.product_5 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_6 != blank %}
+                          {% assign product = block.settings.product_6 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_7 != blank %}
+                          {% assign product = block.settings.product_7 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.product_8 != blank %}
+                          {% assign product = block.settings.product_8 %}
+                          <div class="product-card-item">
+                            <div class="product-card-top">
+                              {% if product.featured_image %}
+                                <img src="{{ product.featured_image | image_url: width: 140 }}" alt="{{ product.title }}" class="product-card-image">
+                              {% endif %}
+                              <div class="product-card-right">
+                                <a href="{{ product.url }}" class="product-card-button" onclick="event.stopPropagation();">Shop Now</a>
+                                <div class="product-card-prices">
+                                  {% if product.compare_at_price > product.price %}
+                                    <p class="product-card-compare-price">{{ product.compare_at_price | money }}</p>
+                                  {% endif %}
+                                  <p class="product-card-price">{{ product.price | money }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <h3 class="product-card-title">{{ product.title }}</h3>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    {% if product_count > 1 %}
+                      <button class="product-nav-btn next" aria-label="Next product">›</button>
+                      
+                      <div class="product-dots">
+                        {% for i in (1..product_count) %}
+                          <button class="product-dot {% if forloop.first %}active{% endif %}" aria-label="Product {{ forloop.index }}"></button>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;">
+                Add Video
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="carousel-nav-btn next" aria-label="Next">›</button>
+    </div>
+
+    <div class="carousel-dots"></div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const section = document.getElementById('video-carousel-{{ section.id }}');
+    const track = section.querySelector('.video-carousel-track');
+    const slides = section.querySelectorAll('.video-carousel-slide:not(.video-carousel-slide-clone)');
+    const allSlides = section.querySelectorAll('.video-carousel-slide');
+    const prevBtn = section.querySelector('.carousel-nav-btn.prev');
+    const nextBtn = section.querySelector('.carousel-nav-btn.next');
+    const dotsContainer = section.querySelector('.carousel-dots');
+    
+    const autoplay = {{ section.settings.autoplay }};
+    const autoAdvance = {{ section.settings.auto_advance }};
+    const autoAdvanceSpeed = {{ section.settings.auto_advance_speed }} * 1000;
+    
+    let currentIndex = 0;
+    let slidesPerView = {{ section.settings.desktop_columns }};
+    let autoAdvanceInterval;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isTransitioning = false;
+    let isMobile = window.innerWidth <= 768;
+
+    // Initialize product mini-carousels
+    function initProductCarousels() {
+      const productCarousels = section.querySelectorAll('[data-product-carousel]');
+      
+      productCarousels.forEach(carousel => {
+        const track = carousel.querySelector('.product-cards-track');
+        const items = carousel.querySelectorAll('.product-card-item');
+        const prevBtn = carousel.querySelector('.product-nav-btn.prev');
+        const nextBtn = carousel.querySelector('.product-nav-btn.next');
+        const dots = carousel.querySelectorAll('.product-dot');
+        
+        if (items.length <= 1) return; // Skip if only one product
+        
+        let currentProductIndex = 0;
+        
+        function updateProductCarousel() {
+          track.style.transform = `translateX(-${currentProductIndex * 100}%)`;
+          
+          // Update dots
+          dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentProductIndex);
+          });
+          
+          // Update button states
+          if (prevBtn) {
+            prevBtn.disabled = currentProductIndex === 0;
+          }
+          if (nextBtn) {
+            nextBtn.disabled = currentProductIndex === items.length - 1;
+          }
+        }
+        
+        if (prevBtn) {
+          prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentProductIndex > 0) {
+              currentProductIndex--;
+              updateProductCarousel();
+            }
+          });
+        }
+        
+        if (nextBtn) {
+          nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentProductIndex < items.length - 1) {
+              currentProductIndex++;
+              updateProductCarousel();
+            }
+          });
+        }
+        
+        dots.forEach((dot, index) => {
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentProductIndex = index;
+            updateProductCarousel();
+          });
+        });
+        
+        // Touch support for product carousel
+        let productTouchStartX = 0;
+        let productTouchEndX = 0;
+        
+        carousel.addEventListener('touchstart', (e) => {
+          productTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        carousel.addEventListener('touchend', (e) => {
+          productTouchEndX = e.changedTouches[0].screenX;
+          const diff = productTouchStartX - productTouchEndX;
+          const swipeThreshold = 30;
+          
+          if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0 && currentProductIndex < items.length - 1) {
+              currentProductIndex++;
+              updateProductCarousel();
+            } else if (diff < 0 && currentProductIndex > 0) {
+              currentProductIndex--;
+              updateProductCarousel();
+            }
+          }
+        }, { passive: true });
+        
+        updateProductCarousel();
+      });
+    }
+
+    // Update slides per view based on screen size
+    function updateSlidesPerView() {
+      const width = window.innerWidth;
+      isMobile = width <= 768;
+      
+      if (width <= 768) {
+        slidesPerView = {{ section.settings.mobile_columns }};
+      } else if (width <= 1024) {
+        slidesPerView = {{ section.settings.tablet_columns }};
+      } else {
+        slidesPerView = {{ section.settings.desktop_columns }};
+      }
+      updateCarousel(false);
+      createDots();
+    }
+
+    // Calculate total slides
+    function getTotalSlides() {
+      return slides.length;
+    }
+
+    // Update carousel position
+    function updateCarousel(animate = true) {
+      const slideWidth = allSlides[0].offsetWidth;
+      const gap = isMobile ? 15 : 20;
+      const offset = currentIndex * (slideWidth + gap);
+      
+      if (!animate) {
+        track.style.transition = 'none';
+      } else {
+        track.style.transition = 'transform 0.5s ease';
+      }
+      
+      track.style.transform = `translateX(-${offset}px)`;
+      
+      updateDots();
+      
+      if (autoplay) {
+        handleVideoPlayback();
+      }
+
+      // Handle mobile auto-unmute
+      if (isMobile) {
+        handleMobileAutoUnmute();
+      }
+    }
+
+    // Handle seamless infinite loop
+    function handleInfiniteLoop() {
+      const totalSlides = getTotalSlides();
+      
+      if (currentIndex >= totalSlides) {
+        setTimeout(() => {
+          isTransitioning = false;
+          currentIndex = 0;
+          updateCarousel(false);
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 50);
+        }, 500);
+      } else if (currentIndex < 0) {
+        setTimeout(() => {
+          isTransitioning = false;
+          currentIndex = totalSlides - 1;
+          updateCarousel(false);
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 50);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 500);
+      }
+    }
+
+    // Create dots
+    function createDots() {
+      dotsContainer.innerHTML = '';
+      const totalSlides = getTotalSlides();
+      
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.classList.add('carousel-dot');
+        if (i === (currentIndex % totalSlides)) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    // Update dots
+    function updateDots() {
+      const dots = dotsContainer.querySelectorAll('.carousel-dot');
+      const actualIndex = currentIndex % getTotalSlides();
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === actualIndex);
+      });
+    }
+
+    // Go to specific slide
+    function goToSlide(index) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      currentIndex = index;
+      updateCarousel();
+      handleInfiniteLoop();
+      resetAutoAdvance();
+    }
+
+    // Next slide
+    function nextSlide() {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      currentIndex++;
+      updateCarousel();
+      handleInfiniteLoop();
+    }
+
+    // Previous slide
+    function prevSlide() {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      currentIndex--;
+      updateCarousel();
+      handleInfiniteLoop();
+    }
+
+    // Handle video playback with Intersection Observer
+    function handleVideoPlayback() {
+      const videos = section.querySelectorAll('video');
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            video.play().catch(e => console.log('Autoplay prevented:', e));
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.5 });
+
+      videos.forEach(video => observer.observe(video));
+    }
+
+    // Handle mobile auto-unmute for centered video
+    function handleMobileAutoUnmute() {
+      if (!isMobile) return;
+
+      const actualIndex = currentIndex % getTotalSlides();
+      const allVideos = section.querySelectorAll('video');
+      const allMuteIcons = section.querySelectorAll('.mute-icon');
+
+      allVideos.forEach((video, index) => {
+        const slideIndex = parseInt(video.closest('.video-carousel-slide').dataset.slideIndex);
+        if (slideIndex === actualIndex) {
+          video.muted = false;
+          if (allMuteIcons[index]) {
+            allMuteIcons[index].textContent = '🔊';
+          }
+        } else {
+          video.muted = true;
+          if (allMuteIcons[index]) {
+            allMuteIcons[index].textContent = '🔇';
+          }
+        }
+      });
+    }
+
+    // Mute all other videos when one is unmuted
+    function muteAllOtherVideos(currentVideo) {
+      const allVideos = section.querySelectorAll('video');
+      allVideos.forEach(video => {
+        if (video !== currentVideo) {
+          video.muted = true;
+          const muteBtn = video.parentElement.querySelector('.video-mute-toggle .mute-icon');
+          if (muteBtn) {
+            muteBtn.textContent = '🔇';
+          }
+        }
+      });
+    }
+
+    // Mute toggle functionality
+    function setupMuteToggles() {
+      const muteButtons = section.querySelectorAll('.video-mute-toggle');
+      
+      muteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const slide = this.closest('.video-carousel-slide');
+          const video = slide.querySelector('video');
+          const icon = this.querySelector('.mute-icon');
+          
+          if (video.muted) {
+            video.muted = false;
+            icon.textContent = '🔊';
+            muteAllOtherVideos(video);
+          } else {
+            video.muted = true;
+            icon.textContent = '🔇';
+          }
+        });
+      });
+    }
+
+    // Auto advance
+    function startAutoAdvance() {
+      if (autoAdvance) {
+        autoAdvanceInterval = setInterval(() => {
+          nextSlide();
+        }, autoAdvanceSpeed);
+      }
+    }
+
+    function resetAutoAdvance() {
+      if (autoAdvance) {
+        clearInterval(autoAdvanceInterval);
+        startAutoAdvance();
+      }
+    }
+
+    // Touch/Swipe support
+    function setupTouchEvents() {
+      track.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      });
+
+      track.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      });
+    }
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+        resetAutoAdvance();
+      }
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      resetAutoAdvance();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      resetAutoAdvance();
+    });
+
+    window.addEventListener('resize', updateSlidesPerView);
+
+    // Initialize
+    updateSlidesPerView();
+    setupMuteToggles();
+    setupTouchEvents();
+    initProductCarousels();
+    
+    if (autoplay) {
+      handleVideoPlayback();
+    }
+
+    if (isMobile) {
+      handleMobileAutoUnmute();
+    }
+    
+    if (autoAdvance) {
+      startAutoAdvance();
+    }
+
+    // Pause auto-advance when user hovers over carousel
+    section.addEventListener('mouseenter', () => {
+      if (autoAdvance) {
+        clearInterval(autoAdvanceInterval);
+      }
+    });
+
+    section.addEventListener('mouseleave', () => {
+      if (autoAdvance) {
+        startAutoAdvance();
+      }
+    });
+  })();
+</script>
